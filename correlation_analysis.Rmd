@@ -1,0 +1,112 @@
+---
+title: "Correlation Analysis on Economic Factors and the Average House Price in Canada"
+author: "Shayla Tran"
+output: html_document
+---
+
+# Introduction
+
+Enter a blurb here about why this project is being done and what the goal of this correlation analysis is.
+* Mention a reference about the economic factors that are generally know and how that is used to determine house prices across Canada.
+
+***
+
+# Economic Factors
+
+Provide a brief description as to what they are and what it contains. Show an interactive scatterplot dashboard from 2005 to 2022. Show some cleaning of the data to narrow it down.
+
+```{r, results='hide'}
+# Loading in the libraries
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+```
+
+
+```{r, results = 'hide'}
+# Reading in the .csv files and alter tables
+cpi <- read.csv("raw\ data/consumerpriceindex.csv") %>%
+  filter(REF_DATE >= 2013, REF_DATE <= 2021) %>%          # Filter for years 2013 - 2021
+  filter(Products.and.product.groups == 'All-items') %>%  # Filter for 'All-items' only
+  rename(YEAR = REF_DATE, INDEX = VALUE) %>%              # Rename columns
+  select(YEAR, INDEX)                                     # Select necessary columns
+
+emp <- read.csv("raw\ data/employment.csv") %>%
+  filter(REF_DATE >= 2013, REF_DATE <= 2021) %>%   
+  rename(YEAR = REF_DATE, TOTAL_PERSONS = VALUE, INDUSTRY = North.American.Industry.Classification.System..NAICS.)   %>% select(YEAR, INDUSTRY, TOTAL_PERSONS)   
+
+gdp <- read.csv("raw\ data/gdp.csv") %>%
+  filter(REF_DATE >= 2013, REF_DATE <= 2021) %>%
+  filter(North.American.Industry.Classification.System..NAICS. == 'All industries [T001]') %>% 
+  rename(YEAR = REF_DATE) %>% 
+  group_by(YEAR) %>%
+  summarize(AVG_VALUE = mean(VALUE)) # Calculate average VALUE for each year
+
+hi <- read.csv("raw\ data/housinginvestment.csv") %>%
+  filter(REF_DATE >= 2013, REF_DATE <= 2021) %>%
+  filter(Institutional.sector == 'Total economy') %>% 
+  rename(YEAR = REF_DATE) %>% 
+  select(YEAR, VALUE) # In millions
+
+income <- read.csv("raw\ data/income.csv") %>%
+  filter(REF_DATE >= 2013, REF_DATE <= 2021) %>%
+  filter(Persons.with.income == "Median total income") %>%
+  rename(YEAR = REF_DATE, AVG_SALARY = VALUE) %>% 
+  select(YEAR, AVG_SALARY)
+
+intrate <- read.csv("raw\ data/interestrate.csv") %>%
+  mutate(YEAR = as.integer(substr(REF_DATE, 1, 4))) %>%   # Extract year from REF_DATE and convert to integer
+  filter(YEAR >= 2013, YEAR <= 2021) %>%                  # Filter for years 2005 - 2021
+  filter(Components %in% c('Total, funds advanced, residential mortgages, insured', 
+                           'Total, funds advanced, residential mortgages, uninsured', 
+                           'Total, outstanding balances, residential mortgages, insured', 
+                           'Total, outstanding balances, residential mortgages, uninsured')) %>% 
+                            # Filter for chosen components
+  group_by(YEAR, Components) %>%
+  summarize(Interest_Rate = mean(VALUE[Unit.of.measure == 'Interest rate'], na.rm = TRUE)) %>% 
+  # Compute the mean interest rate per component per year
+  ungroup()
+
+pop <- read.csv("raw\ data/population.csv") %>%
+  filter(REF_DATE >= 2013, REF_DATE <= 2021) %>%
+  filter(Age.group == 'All ages') %>% 
+  rename(YEAR = REF_DATE, TOTAL_PERSONS = VALUE) %>% 
+  select(YEAR, TOTAL_PERSONS)
+
+avgprice <- read.csv("raw\ data/avgprice.csv")
+colnames(avgprice) <- trimws(colnames(avgprice)) # Clean the column names to remove leading/trailing whitespaces
+avgprice <- avgprice %>%
+  mutate(YEAR = year(dmy(paste0("01-", Date))),  # Parse 'Date' and extract the year
+         AVG_PRICE = as.numeric(`Average.`)) %>%  # Convert 'Average.' to numeric
+  filter(YEAR >= 2013, YEAR <= 2021) %>%  # Filter for years 2013 - 2021
+  group_by(YEAR) %>%  # Group by YEAR
+  summarize(AVG_PRICE = mean(AVG_PRICE, na.rm = TRUE)) %>% # Calculate average price per year
+  ungroup()
+```
+
+```{r}
+# Generating scatterplot for each data frame (for all the economic factors)
+
+plot.cpi <- ggplot(cpi, aes(x = YEAR, y = INDEX)) + geom_point(colour = "red") + geom_line(colour = "red") + ggtitle("Consumer Price Index in Canada from 2013 to 2021") + xlab("Year") + ylab("Index")
+
+plot.hi <- ggplot(hi, aes(x = YEAR, y = VALUE)) + geom_point(colour = "purple") + geom_line(colour = "purple") + ggtitle("Housing Investment in Canada from 2013 to 2021") + xlab("Year") + ylab("CAD Dollars (millions)")
+
+plot.gdp <- ggplot(gdp, aes(x = YEAR, y = AVG_VALUE)) + geom_point(colour = "orange") + geom_line(colour = "orange") + ggtitle("Gross Domestic Product in Canada from 2013 to 2021") + xlab("Year") + ylab("CAD Dollars (millions)")
+
+plot.income <- ggplot(income, aes(x = YEAR, y = AVG_SALARY)) + geom_point(colour = "magenta") + geom_line(colour = "magenta") + ggtitle("Median Income in Canada from 2013 to 2021") + xlab("Year") + ylab("CAD Dollars")
+
+plot.intrate <- ggplot(intrate, aes(x = YEAR, y = Interest_Rate)) + geom_point(aes(color = Components)) + geom_line(aes(color = Components, group = Components), size = 1.1) + ggtitle("Mortgage Interest Rates in Canada from 2013 to 2021") + xlab("Year") + ylab("Percentage") + 
+theme(
+    legend.position = "bottom",  # Move legend to bottom
+    legend.text = element_text(size = 8),  # Resize legend text
+    legend.direction = "vertical",  # Stack legend items vertically
+    plot.margin = margin(1, 1, 1, 1, "cm")  # Adjust margins
+  )
+
+plot.pop <- ggplot(pop, aes(x = YEAR, y = TOTAL_PERSONS)) + geom_point(colour = "forestgreen") + geom_line(colour = "forestgreen") + ggtitle("Population of Canada from 2013 to 2021") + xlab("Year") + ylab("Number of Persons")
+
+plot.avgprice <- ggplot(avgprice, aes(x = YEAR, y = AVG_PRICE)) + geom_point(colour = "blue") + geom_line(colour = "blue") + ggtitle("Average House Price in Canada from 2013 to 2021") + xlab("Year") + ylab("CAD Dollars")
+
+# Arrange in 8, have the interest rate as a stand alone
+```
+
