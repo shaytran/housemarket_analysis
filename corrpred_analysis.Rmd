@@ -6,9 +6,8 @@ output: html_document
 
 # Introduction
 
-In this project, we analyze the Canadian housing market by studying how different economic factors affect house prices from 2013 to 2021. We focus on seven key economic indicators and use correlation analysis to understand their relationship with housing prices. To predict house prices for the year 2022, we apply two predictive modeling techniques: LASSO (Least Absolute Shrinkage and Selection Operator) and Random Forests. 
-
-These models are trained with data from the eight economic factors, considering scenarios where the economy might worsen, remain stable, or improve, based on 2021 trends. **This study aims to provide a clear view of how economic conditions are linked to housing prices and demonstrate the effectiveness of modern statistical methods in economic predictions.**
+Enter a blurb here about why this project is being done and what the goal of this correlation analysis is.
+* Mention a reference about the economic factors that are generally know and how that is used to determine house prices across Canada.
 
 ***
 
@@ -18,52 +17,6 @@ Provide a brief description as to what they are and what it contains. Show an in
 
 * Ensure that you describe the exact details of the data and what groups they include and what they mean
 * intrate is oversimplified here, make sure to explain it
-
-The economic factors chosen for this study are all based in Canada and are the following :
-
-##### 1. Consumer price index (CPI)
-***A measure that tracks the average price change over time for a fixed basket of goods and services. Presented as an index value.***
-
-[Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000501)
-
-##### 2. Employment rate
-***The percentage of the entire Canadian population that is employed. Includes individuals of all education levels from primary school to graduate degrees.***
-
-[Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002001&pickMembers%5B0%5D=1.1&pickMembers%5B1%5D=2.10&pickMembers%5B2%5D=4.1&pickMembers%5B3%5D=5.1&cubeTimeFrame.startYear=2019&cubeTimeFrame.endYear=2023&referencePeriods=20190101%2C20230101)
-
-##### 3. Gross domestic product (GDP) at basic prices
-***The total monetary value of all finished goods and services produced within a country's borders in a specific time period. The units are in CAD million dollars.***
-
-[Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610040101)
-
-##### 4. Housing investment
-***The total monetary value of all investments in residential construction for all dwelling types, including private and social housing. The units are in CAD million dollars.***
-
-[Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610067701)
-
-##### 5. Median income
-***The median total income for Canadian citizens based on both sexes and all age groups. The units are in CAD dollars.***
-
-[Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1110000801)
-
-##### 6. Mortgage interest rate
-***The average interest rate for new and existing lending, for both insured and uninsured mortgages. This data also includes both variable and fixed rates. Presented as a percentage.***
-
-[Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1010000601)
-
-##### 7. Population
-***The total annual population of Canada, including all age groups and both sexes. Presented as the number of persons.***
-
-[Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710000501)
-
-These factors are known to be possibly associated with the fluctuations of the housing market (see Ref. 1 and Ref. 2). We additionally have the [average price of a house in Canada from 2013 to 2021](https://www.crea.ca/housing-market-stats/canadian-housing-market-stats/) to compare with and to use to train our models.
-
-[Reference 1][1]
-[Reference 2][2]
-
-***
-
-We'll start by loading in the `.csv` files for each datasest. The dataframes will include the years from 2013 to 2021 and the value.
 
 ```{r, results='hide'}
 # Loading in the libraries
@@ -139,10 +92,6 @@ avgprice <- avgprice %>%
   ungroup()
 ```
 
-# Scatterplots
-
-Generating a collection of scatterplots to visualize the data of all the eight datasets.
-
 ```{r}
 # Generating scatterplot for each data frame (for all the economic factors)
 
@@ -163,7 +112,7 @@ plot.avgprice <- ggplot(avgprice, aes(x = YEAR, y = AVG_HousePrice)) + geom_poin
 plot.emp <- ggplot(emp, aes(x = YEAR, y = EMP_percentage)) + geom_point() + geom_line() + ggtitle("Employment Rate in Canada from 2013 to 2021") + xlab("Year") + ylab("Percentage of population")
 ```
 
-```{r, echo = FALSE}
+```{r}
 # Arrange plots in window (interest rate will be standalone)
 grid.arrange(plot.avgprice, plot.cpi, nrow = 2, ncol = 1)
 grid.arrange(plot.emp, plot.gdp, nrow = 2, ncol = 1)
@@ -178,7 +127,10 @@ ggsave("economicfactors_plots.png", grid.arrange(plot.avgprice, plot.cpi, plot.e
 
 # Correlation Analysis using `corrplot`
 
-This correlation analysis investigates the relationship between key economic factors and average house prices in Canada. By merging datasets on variables like CPI, GDP, employment, and interest rates, we aim to identify how these elements interact with housing prices. The resulting correlation matrix offers insights into which economic indicators most significantly influence the housing market, aiding in understanding market dynamics and informing decision-making in real estate and economic policy.
+Give some reasons as to why we want to do this and how it can contribute to predictive modeling. What are some other practical uses for running this kind of analysis? (ie. policymaking)
+
+* We want to see which factors are correlated with house prices
+
 
 ```{r}
 # Merge all the dataframes into one
@@ -189,23 +141,15 @@ cor_matrix <- cor(merged.df[, -1])  # Exclude the first column if it is 'Year'
 corrplot(cor_matrix, method = "circle", tl.col = "black", tl.cex = 1)
 ```
 
-#### Interpretation
-
-* **Average House Price** has a strong positive correlation with **Median Salary** and **GDP**, indicating that as these increase, the average house price tends to increase as well.
-* **CPI Index** has a moderate positive correlation with **Average House Price**, suggesting that inflation is related to rising house prices.
-* **Employment Percentage** shows a weak to moderate positive correlation with **Average House Price**, which may indicate that higher employment rates could be associated with higher house prices.
-* **Interest Rate** has a moderate negative correlation with **Average House Price**, which is expected as higher interest rates generally reduce housing affordability and demand, leading to lower house prices.
-* **Population** has a weak positive correlation with **Average House Price**, implying that areas with growing populations might experience a slight increase in housing prices due to increased demand.
-
-We can use this result to direct variable selection when building a model and choosing features that are strongly correlated with the average house price. For simplicity, the results from this analysis will not be considered for model building but demonstrates how a correlation analysis can be a stepping stone into variable selection.
-
 # Building A Predictive Model using Regression Models
 
-Two models are developed using Random Forests and LASSO regression to predict Canadian house prices, trained on combined data from 2013 to 2021. For 2022, three scenarios are crafted in a synthetic dataset to reflect possible economic conditions, using the data trends from 2021. The models' accuracy was tested with cross-validation techniques: LOOCV for LASSO and OOB for Random Forests, ensuring reliable predictions with the Mean Squared Error (MSE) as the accuracy metric.
+* Random Forests, LASSO
+* Check for multicollinearity and the statistical significance of the factors
+* Check cross validation 
+* Use to predict 2022 (Bad economic health, good economic health, does not change much)
+  * Will use sythetic data to represent scenarios (improving, worsening, unchanging)
+  * Change the positive and negative influnecing factors
   
-###### The 2022 Dataset
-
-*This approach is very generalized and does not represent the actual economic trends of 2022. This is for demonstration purposes to test and use the model to make predictions on a set of variables only.*
 ```{r}
 # The fabricated 2022 data frames for the 3 scenarios
 improving_factors <- c(1.02, 1.03, 1.04, 1.05, 1.04, 1.03, -0.05, 1.02)
@@ -222,12 +166,11 @@ synthetic_2022 <- rbind(
 # Add the YEAR column
 synthetic_2022$YEAR <- 2022
 synthetic_2022
+
 ```
 
+
 ### LASSO
-
-Executes a LASSO regression to predict average house prices, using leave-one-out cross-validation (LOOCV) for model accuracy. The best lambda value is identified that minimizes the mean squared error (MSE), then the final model is fit using this lambda. The final model predicts house prices for 2022 under the three economic scenarios. 
-
 ```{r}
 lasso.hp <- cv.glmnet(model.matrix(AVG_HousePrice ~ . - YEAR, data=merged.df), alpha = 1, merged.df$AVG_HousePrice, nfolds=nrow(merged.df)) # Perform LOOCV by setting folds to number of rows in the merged dataframe
 plot(lasso.hp)
@@ -244,7 +187,9 @@ final.lasso.hp <- glmnet(model.matrix(AVG_HousePrice ~ . - YEAR, data = merged.d
                             lambda = best_lambda)
 ```
 
-**The cross-validated MSE of the LASSO model is reported to be 9.998826e+07.** Based on the LASSO graph, we can consider the estimated best case with 4 predictors with \lambda that generates the smallest MSE. Next, we'll predict the housing prices for 2022 based on the 3 scenarios.
+* I need to address the statistical insignificance and what might lead to that.
+* Talk about multicollinearity which can be addressed with LASSO
+* We can consider the estimated best case (with 4 predictors)
 
 ```{r}
 # Predicting for the 3 scenarios for 2022
@@ -268,12 +213,9 @@ rownames(lasso_results) <- "AVG_HousePrice"
 lasso_results
 ```
 
-Using the LASSO model, the predicted housing prices for 2022 in all scenarios are higher than that of 2021. There is some contradictions in the results, where we might expect the **Worsening** scenario to lead to lower housing prices, or at least lower than that of the **Stable** scenario. The **Improving** scenario shows the highest predicted price which aligns with economic expectations. 
+Interpret the results here.
 
 ### Random Forests
-
-Executes a Random Forest regression to estimate average house prices, employing the dataset's inherent cross-validation feature for model accuracy assessment. The model's mean squared error (MSE) is extracted for performance evaluation. Utilizing the trained model, predictions for average house prices in 2022 are made under the three economic scenarios—improving, stable, and worsening.
-
 ```{r}
 set.seed(919)
 rf.hp <- randomForest(AVG_HousePrice~., data=merged.df)
@@ -283,8 +225,6 @@ rf.hp
 rf.mse <- rf.hp$mse[length(rf.hp$mse)]
 cat('The cross-validated MSE is', format(rf.mse, scientific = TRUE))
 ```
-**The cross-validated MSE of the Random Forests model is reported to be 3.76294e+09.** Based on the LASSO graph, we can consider the estimated best case with 4 predictors with \lambda that generates the smallest MSE. Next, we'll predict the housing prices for 2022 based on the 3 scenarios.
-
 
 ```{r}
 # Predict the 2022 house prices using the synthetic 2022 data
@@ -308,10 +248,3 @@ Interpret the results here.
 ### LASSO vs Random Forests
 
 * Create a table to show MSE and the prediction results. Compare and contrast the ideas.
-
-***
-
-## References
-
-[1]: https://www.moneysense.ca/spend/real-estate/whats-affecting-canadas-real-estate-and-housing-market/
-[2]: https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/housing-market-indicators
