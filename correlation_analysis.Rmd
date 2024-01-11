@@ -14,58 +14,54 @@ These models are trained with data from the eight economic factors, considering 
 
 # Economic Factors
 
-Provide a brief description as to what they are and what it contains. Show an interactive scatterplot dashboard from 2013 to 2021. Show some cleaning of the data to narrow it down.
-
-* Ensure that you describe the exact details of the data and what groups they include and what they mean
-* intrate is oversimplified here, make sure to explain it
-
 The economic factors chosen for this study are all based in Canada and are the following :
 
 ##### 1. Consumer price index (CPI)
-***A measure that tracks the average price change over time for a fixed basket of goods and services. Presented as an index value.***
+A measure that tracks the average price change over time for a fixed basket of goods and services. Presented as an index value.
 
 [Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1810000501)
 
 ##### 2. Employment rate
-***The percentage of the entire Canadian population that is employed. Includes individuals of all education levels from primary school to graduate degrees.***
+The percentage of the entire Canadian population that is employed. Includes individuals of all education levels from primary school to graduate degrees.
 
 [Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410002001&pickMembers%5B0%5D=1.1&pickMembers%5B1%5D=2.10&pickMembers%5B2%5D=4.1&pickMembers%5B3%5D=5.1&cubeTimeFrame.startYear=2019&cubeTimeFrame.endYear=2023&referencePeriods=20190101%2C20230101)
 
 ##### 3. Gross domestic product (GDP) at basic prices
-***The total monetary value of all finished goods and services produced within a country's borders in a specific time period. The units are in CAD million dollars.***
+The total monetary value of all finished goods and services produced within a country's borders in a specific time period. The units are in CAD million dollars
 
 [Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610040101)
 
 ##### 4. Housing investment
-***The total monetary value of all investments in residential construction for all dwelling types, including private and social housing. The units are in CAD million dollars.***
+The total monetary value of all investments in residential construction for all dwelling types, including private and social housing. The units are in CAD million dollars.
 
 [Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610067701)
 
 ##### 5. Median income
-***The median total income for Canadian citizens based on both sexes and all age groups. The units are in CAD dollars.***
+The median total income for Canadian citizens based on both sexes and all age groups. The units are in CAD dollars.
 
 [Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1110000801)
 
 ##### 6. Mortgage interest rate
-***The average interest rate for new and existing lending, for both insured and uninsured mortgages. This data also includes both variable and fixed rates. Presented as a percentage.***
+The average interest rate for new and existing lending, for both insured and uninsured mortgages. This data also includes both variable and fixed rates. Presented as a percentage.
 
 [Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1010000601)
 
 ##### 7. Population
-***The total annual population of Canada, including all age groups and both sexes. Presented as the number of persons.***
+The total annual population of Canada, including all age groups and both sexes. Presented as the number of persons.
 
 [Data source](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710000501)
 
 These factors are known to be possibly associated with the fluctuations of the housing market (see Ref. 1 and Ref. 2). We additionally have the [average price of a house in Canada from 2013 to 2021](https://www.crea.ca/housing-market-stats/canadian-housing-market-stats/) to compare with and to use to train our models.
 
 [Reference 1][1]
+
 [Reference 2][2]
 
 ***
 
 We'll start by loading in the `.csv` files for each datasest. The dataframes will include the years from 2013 to 2021 and the value.
 
-```{r, results='hide'}
+```{r, warning=FALSE, message=FALSE}
 # Loading in the libraries
 library(tidyverse)
 library(ggplot2)
@@ -171,7 +167,7 @@ grid.arrange(plot.hi, plot.income, nrow = 2, ncol = 1)
 grid.arrange(plot.intrate, plot.pop, nrow = 2, ncol = 1)
 ```
 
-```{r, results = 'hide'}
+```{r, include=FALSE}
 # Save image of plots
 ggsave("economicfactors_plots.png", grid.arrange(plot.avgprice, plot.cpi, plot.emp, plot.gdp, plot.hi, plot.income, plot.intrate, plot.pop, nrow = 4, ncol = 2), width = 20, height = 20)
 ```
@@ -203,9 +199,9 @@ We can use this result to direct variable selection when building a model and ch
 
 Two models are developed using Random Forests and LASSO regression to predict Canadian house prices, trained on combined data from 2013 to 2021. For 2022, three scenarios are crafted in a synthetic dataset to reflect possible economic conditions, using the data trends from 2021. The models' accuracy was tested with cross-validation techniques: LOOCV for LASSO and OOB for Random Forests, ensuring reliable predictions with the Mean Squared Error (MSE) as the accuracy metric.
   
-###### The 2022 Dataset
+##### The 2022 Dataset
 
-*This approach is very generalized and does not represent the actual economic trends of 2022. This is for demonstration purposes to test and use the model to make predictions on a set of variables only.*
+*This approach is very generalized and does not represent the actual economic trends of 2022. This is for demonstration purposes to test and use the model to make predictions on a set of variables only. Due to the limited available data, the actual predictor values for the year 2022 were not attainable.*
 ```{r}
 # The fabricated 2022 data frames for the 3 scenarios
 improving_factors <- c(1.02, 1.03, 1.04, 1.05, 1.04, 1.03, -0.05, 1.02)
@@ -234,7 +230,7 @@ plot(lasso.hp)
 
 # Obtain the MSE
 lasso.mse <- min(lasso.hp$cvm)
-cat('The MSE from the LASSO model is', format(lasso.mse, scientific = TRUE))
+cat('The cross-validated MSE from the LASSO model is', format(lasso.mse, scientific = TRUE))
 
 # Generating the final model with the appropriate lambda
 best_lambda <- lasso.hp$lambda.min # Extract the most effective lambda value (resulted in the lowest MSE in CV)
@@ -276,15 +272,15 @@ Executes a Random Forest regression to estimate average house prices, employing 
 
 ```{r}
 set.seed(919)
-rf.hp <- randomForest(AVG_HousePrice~., data=merged.df)
+rf.hp <- randomForest(AVG_HousePrice~. - YEAR, data=merged.df)
 rf.hp
 
 # Obtain the MSE from OOB CV
 rf.mse <- rf.hp$mse[length(rf.hp$mse)]
 cat('The cross-validated MSE is', format(rf.mse, scientific = TRUE))
 ```
-**The cross-validated MSE of the Random Forests model is reported to be 3.76294e+09.** Based on the LASSO graph, we can consider the estimated best case with 4 predictors with \lambda that generates the smallest MSE. Next, we'll predict the housing prices for 2022 based on the 3 scenarios.
 
+**The cross-validated MSE of the Random Forests model is reported to be 3.60007e+09.** Here, we consider only 2 variables at each split.
 
 ```{r}
 # Predict the 2022 house prices using the synthetic 2022 data
@@ -303,15 +299,37 @@ rownames(rf_results) <- "AVG_HousePrice"
 rf_results
 ```
 
-Interpret the results here.
+# Results & Conclusion
 
-### LASSO vs Random Forests
+```{r}
+final_results <- rbind(lasso_results, rf_results) # Merging the LASSO and Random Forests results together
+final_results$MSE <- c('9.998826e+07', '3.60007e+09') # Adding the MSE values
+rownames(final_results) <- c('LASSO', 'Random Forests') # Add row names for each model
 
-* Create a table to show MSE and the prediction results. Compare and contrast the ideas.
+final_results
+```
+
+#### Model Performance
+
+**LASSO resulted with a much lower MSE value than that of Random Forests, where the MSE values were 9.998826e+07 and 3.60007e+09, respectively**. The MSE shows that the LASSO model is more accurate than the Random Forests, which is contrary to the common notion that Random Forests models are typically more robust in terms of predictive power. 
+
+However, given the small dataset of only 9 observations with 7 predictors, the LASSO model likely outperformed the Random Forest due to its ability to perform variable selection and regularization. The LASSO's strength lies in its capacity to shrink less important predictor coefficients to zero, effectively performing feature selection and reducing model complexity, which is particularly advantageous in datasets with a small number of observations. On the other hand, Random Forest models are generally more suited to larger datasets as they require enough data to grow multiple trees and capture complex interactions, which may not be feasible with such a limited number of samples, leading to a higher MSE due to overfitting or inability to converge to the underlying data structure. With this in mind, a lower MSE value for the LASSO model is characteristic when working with smaller datasets.
+
+#### 2022 Average House Price Predictions
+
+In using a synthetic dataset with made-up values for the predictors to mimic an improving, worsening and stable economy only based on the 2021 values can limit the ability of the models to perform accurate predictions on the average house price based on its predictors. The results should be able to capture the general essence of the possible house price given these 3 scenarios, so we expect that we see some differences between each type of economy.
+
+**For the LASSO model**, we can see that the improving 2022 economy generates the highest average house price, which is as to be expected if the economic health is optimistic. We see that the worsening 2022 economy is not as high, but still higher than that of 2021. The stable 2022 economy has a very similar house price to that of 2021, which is to be expected if the economic health remains relatively the same. Interestingly, we might expect that the worsening 2022 average house price be lower than 2021, or at least lower than the 2022 stable avergae house price. This discrepancy may arise due to the limited dataset the model was trained on; thereby, it may have not been able to capture the full picture of the relationship between the features. Most importantly, we do see some consistent trends and a difference of the average house prices as the predictors change.
+
+**For the Random Forests model**, the results are less promising but do have some redeeming points. As expected, the worsening 2022 average house price is lower than that of 2021; however, the house prices for improving 2022 and stable 2022 are lower than 2021 average house prices. In addition, both of their values are very close to one another. This oddity could have arisen from the limited dataset and, as a result, was not able to capture the full picture of the economic predictors and its relation with average house prices. From these results, we can see that Random Forests performed worse than LASSO, and this conclusion is re-affirmed by it's larger MSE value from cross-validation.
+
+# Future Direction
+
+The principal limiting factor of this project is the dataset itself. The models would benefit from a much larger dataset with more observations (more years) which could better tune its predictive accuracy. Additionally, it would best to use the real 2022 measurements of the economic predictors to predict for the average Canadian house price and compare it to the actual value from 2022. With these changes, we may be able to observe that Random Forests performs better than LASSO with a larger dataset; however, LASSO may be easier to interpret for general audiences. 
+
+In addition, more predictors that are associated with the house market could be useful to increase the predictive accuracy, but one would have to be mindful of the increased complexity that that would incur to the models. 
 
 ***
-
-## References
 
 [1]: https://www.moneysense.ca/spend/real-estate/whats-affecting-canadas-real-estate-and-housing-market/
 [2]: https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/housing-market-indicators
