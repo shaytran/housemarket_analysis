@@ -1,4 +1,5 @@
 # Canadian Housing Market Analysis & Predictive Models
+by Shayla Tran
 
 ## Introduction
 This project presents an analysis of the housing market, aimed at uncovering the complex dynamics that influence property values. Using correlative data analytics techniques, we delve into various economic factors such as annual GDP, mortgage interest rates, CPI, and employment rates, to derive meaningful insights. Our objective is to provide a tool for stakeholders in the real estate sector, including investors, homebuyers, and policymakers, to make informed decisions.
