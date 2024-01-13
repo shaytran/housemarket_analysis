@@ -55,5 +55,8 @@ The analysis focuses on several key aspects:
 * Predictive modeling to forecast market trends.
 * Visualizing complex data for easy interpretation and insights.
 
+The HTML version of the analysis, generated from the R Markdown file, is available in this repository. You can download it [here](housemarket_analysis/correlation_analysis.html).
+
+
 ## License
 [Insert info]
