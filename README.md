@@ -56,13 +56,14 @@ The analysis focuses on several key aspects:
 * Visualizing complex data for easy interpretation and insights.
 
 ![Line charts of the economic factors](images/economicfactors_plots.png)
-*Caption: Description of the image.*
+*Figure 1: Line plots of the economic factors from 2013 to 2021.*
 
 ![corrplot chart](/images/corr.png)
-*Correlation plot using `corrplot` to observe how the 8 economic factors are correlated to one another.*
+
+*Figure 2: Correlation plot using `corrplot` to observe how the 8 economic factors are correlated to one another.*
 
 The HTML version of the analysis, generated from the R Markdown file, is available in this repository. You can download it [here](correlation_analysis.html).
 
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
