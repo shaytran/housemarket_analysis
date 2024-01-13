@@ -1,6 +1,16 @@
 # Canadian Housing Market Analysis & Predictive Models
 by Shayla Tran
 
+## Table of Contents
+- [Introduction](#introduction)
+- [Technologies](#technologies)
+- [Setup](#setup)
+- [Usage](#usage)
+- [Features](#features)
+- [Data Sources](#data-sources)
+- [Analysis Overview](#analysis-overview)
+- [License](#license)
+
 ## Introduction
 This project presents an analysis of the housing market, aimed at uncovering the complex dynamics that influence property values. Using correlative data analytics techniques, we delve into various economic factors such as annual GDP, mortgage interest rates, CPI, and employment rates, to derive meaningful insights. Our objective is to provide a tool for stakeholders in the real estate sector, including investors, homebuyers, and policymakers, to make informed decisions.
 
@@ -64,6 +74,9 @@ The analysis focuses on several key aspects:
 
 The HTML version of the analysis, generated from the R Markdown file, is available in this repository. You can download it [here](correlation_analysis.html).
 
-
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
+
+---
+
+© 2024 [Shayla Tran]([Your-GitHub-Profile-Link](https://github.com/shaytran)https://github.com/shaytran)
