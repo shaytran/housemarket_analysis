@@ -1,5 +1,4 @@
 # Canadian Housing Market Analysis & Predictive Models
-by Shayla Tran
 
 ## Table of Contents
 - [Introduction](#introduction)
