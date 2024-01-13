@@ -55,8 +55,14 @@ The analysis focuses on several key aspects:
 * Predictive modeling to forecast market trends.
 * Visualizing complex data for easy interpretation and insights.
 
-The HTML version of the analysis, generated from the R Markdown file, is available in this repository. You can download it [here](housemarket_analysis/correlation_analysis.html).
+![Line charts of the economic factors](images/economicfactors_plots.png)
+*Caption: Description of the image.*
+
+![corrplot chart](/images/corr.png)
+*Correlation plot using `corrplot` to observe how the 8 economic factors are correlated to one another.*
+
+The HTML version of the analysis, generated from the R Markdown file, is available in this repository. You can download it [here](correlation_analysis.html).
 
 
 ## License
-[Insert info]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
